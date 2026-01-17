@@ -1,0 +1,82 @@
+services:
+  user_db:
+    container_name: user-db
+    image: postgres:15
+    shm_size: 128mb
+    env_file:
+      - "user_service/.env.postgres"
+    networks:
+      - backend-microservices-network
+    volumes:
+      - pgdata-user:/var/lib/postgresql@15/data
+
+  user_service:
+    container_name: user-service
+    build: ./user_service
+    env_file:
+      - ./user_service/.env.prod
+    depends_on:
+      - user_db
+    networks:
+      - backend-microservices-network
+
+  recipe_db:
+    container_name: recipe-db
+    image: postgres:15
+    shm_size: 128mb
+    env_file:
+      - "recipe_service/.env.postgres"
+    networks:
+      - backend-microservices-network
+    volumes:
+      - pgdata-recipe:/var/lib/postgresql@15/data
+
+  recipe_service:
+    container_name: recipe-service
+    build: ./recipe_service
+    env_file:
+      - ./recipe_service/.env.prod
+    depends_on:
+      - recipe_db
+    networks:
+      - backend-microservices-network
+
+  social_db:
+    container_name: social-db
+    image: postgres:15
+    shm_size: 128mb
+    env_file:
+      - "social_service/.env.postgres"
+    networks:
+      - backend-microservices-network
+    volumes:
+      - pgdata-social:/var/lib/postgresql@15/data
+
+  social_service:
+    container_name: social-service
+    build: ./social_service
+    env_file:
+      - ./social_service/.env.prod
+    depends_on:
+      - social_db
+    networks:
+      - backend-microservices-network
+    
+  gateway_service:
+    container_name: gateway-service
+    build: ./gateway_service
+    env_file:
+      - ./gateway_service/.env.prod
+    ports:
+      - 3000:3000
+    networks:
+      - backend-microservices-network
+
+volumes:
+  pgdata-user:
+  pgdata-recipe:
+  pgdata-social:
+
+networks:
+  backend-microservices-network:
+    driver: bridge
